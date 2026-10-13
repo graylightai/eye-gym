@@ -14,9 +14,7 @@
 <link rel="icon" href="img/eyes.png">
 <title>目力練功房</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="fonts.css">
 <style>
 :root{
   --paper:#EFF4F2; --surface:#FFFFFF; --sunken:#E5ECE9;
@@ -25,8 +23,11 @@
   --sun:#D99A12; --coral:#CE5742;
   --shadow:0 1px 2px rgba(14,43,51,.05), 0 10px 26px -14px rgba(14,43,51,.28);
   --pcsh:rgba(0,0,0,.42);
-  --display:'Fredoka','Noto Sans TC',system-ui,sans-serif;
-  --body:'Noto Sans TC',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  /* 拉丁字體自帶（fonts.css），中文走系統字體——iOS 是蘋方、Android 是 Noto Sans CJK，
+     都已經在裝置上，不用下載，離線也不會掉字。 */
+  --cjk:'PingFang TC','Noto Sans CJK TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
+  --display:'Fredoka',var(--cjk);
+  --body:-apple-system,BlinkMacSystemFont,'Segoe UI',var(--cjk);
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){
@@ -1473,6 +1474,16 @@ function boot(data) {
 if (window.claude?.hot?.ready) window.claude.hot.ready(boot);
 else boot(window.claude?.hot?.data ?? {});
 window.claude?.hot?.snapshot?.(() => ({ settings: S }));
+
+/* 離線用：第一次連著網路打開時，Service Worker 會把整個 app（含 129 張圖和字體）
+   抓進快取，之後沒網路也能從主畫面開起來玩。
+   註冊失敗不影響遊戲——例如用 file:// 開，或在不支援的環境裡。 */
+const secure = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+if ('serviceWorker' in navigator && secure) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>

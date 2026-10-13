@@ -10,9 +10,23 @@
 
 ```
 index.html      整個 app（HTML + CSS + JS 都在裡面）
-img/            53 張遊戲圖案 + eyes.png（app 圖示）
+img/            129 張遊戲圖案 + eyes.png（app 圖示）
+fonts/          自帶的拉丁字體（中文走系統字體）
+fonts.css       字體宣告
 manifest.json   PWA 設定，已鎖直板 portrait
+sw.js           Service Worker，負責離線
+build-sw.py     改完東西跑這支重新產生 sw.js
 ```
+
+## 離線（飛機上）
+
+**連著網路開一次**，Service Worker 會把整個 app 抓進快取（137 個檔案、715 KB）。
+之後從主畫面點開，**完全不需要網路**——沒有任何外連資源。訓練紀錄本來就存在本機。
+
+先確認：開啟 app →（手機開飛航模式）→ 再開一次，能玩就是好了。
+
+> 改過 `index.html` 或 `img/` 之後**一定要跑 `python3 build-sw.py` 再 commit**，
+> 否則已經裝在主畫面上的 app 會一直吃舊快取，看不到你的改動。
 
 ## 本機打開
 
@@ -27,9 +41,11 @@ cd 目力練功房 && python3 -m http.server 8000
 
 這個資料夾可以直接丟進 Capacitor（`npx cap add ios` / `android`）或當 PWA 掛到任何靜態主機。`manifest.json` 已經設好 `"orientation": "portrait"`；用 Capacitor 的話 iOS 要在 Xcode 的 Deployment Info 取消勾選橫向，Android 在 `AndroidManifest.xml` 的 activity 加 `android:screenOrientation="portrait"`。
 
-## 圖案授權
+## 授權
 
-`img/` 裡的圖案來自 Google [Noto Emoji](https://github.com/googlefonts/noto-emoji)，採 **Apache License 2.0**，可以商用。上架前把 Apache-2.0 的 NOTICE 放進 app 的授權聲明頁即可。
+`img/` 的圖案來自 Google [Noto Emoji](https://github.com/googlefonts/noto-emoji)，**Apache License 2.0**。
+`fonts/` 的 Fredoka 與 IBM Plex Mono 來自 Google Fonts，**SIL Open Font License 1.1**。
+兩者都可以商用。上架前把這兩份授權聲明放進 app 的授權頁即可。
 
 要換圖：把 PNG（建議 128×128、去背）丟進 `img/`，然後在 `index.html` 的 `SPRITES` 陣列加一筆 `['檔名', '中文名']`。陣列是由易到難排序的——前面放輪廓差很多的，後面放容易看錯的，因為精細度越高才會用到越後面的圖案。
 
